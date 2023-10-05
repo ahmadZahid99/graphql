@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const { colorSchema, validateColor } = require("./color");
+
 // Define a schema for Products
 const productSchema = new mongoose.Schema(
   {
@@ -17,7 +17,6 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    colors: [colorSchema],
   },
   {
     timestamps: true,
@@ -30,7 +29,6 @@ function validateProduct(product) {
     title: Joi.string().max(50).required(),
     description: Joi.string().required(),
     quantity: Joi.number().required(),
-    colors: Joi.array().items(validateColor),
   });
   return schema.validate(product);
 }

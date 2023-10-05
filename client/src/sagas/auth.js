@@ -1,15 +1,13 @@
 import { takeEvery, call, put, fork, takeLatest } from "redux-saga/effects";
 import * as types from "../actions";
 import * as actions from "../actions/auth";
-import { gql } from "@apollo/client";
+import { GET_USER } from "../queries/userQueries";
+import { REGISTOR_USER, LOGIN_USER } from "../mutations/userMutations";
 import client from "../graphqlClient";
-import * as api from "../api/auth";
-
 import { setSession } from "../auth/utils";
 
 function* initSession({ payload }) {
   try {
-    console.log(payload.token);
     setSession(payload.token);
   } catch (e) {
     if (
@@ -34,22 +32,20 @@ function* watchInitSession() {
 
 function* getUsers(payload) {
   try {
-    const result = yield call(api.getUser);
+    const result = yield call(client.query, {
+      query: GET_USER,
+      variables: {
+        token: payload.accessToken,
+      },
+    });
 
     yield put(
       actions.getUserSuccess({
-        items: result.data,
+        items: result.data.user,
         accessToken: payload.accessToken,
       })
-      // isAuthenticated: true,
     );
   } catch (e) {
-    // isAuthenticated:
-    //       action.payload.error === 'Error: Not authorized, no token'
-    //         ? false
-    //         : state.isAuthenticated,
-    //     user: action.payload.error === 'Error: Not authorized, no token' ? false : state.user,
-    //     token: action.payload.error === 'Error: Not authorized, no token' ? false : state.token,
     if (e.message === "Error: Not authorized, no token") {
       setSession(null);
       yield put(actions.logoutRequest());
@@ -69,16 +65,6 @@ function* watchGetUserRequest() {
 
 function* registerSaga({ payload }) {
   try {
-    const REGISTOR_USER = gql`
-      mutation Register(
-        $full_name: String!
-        $email: String!
-        $password: String!
-      ) {
-        register(full_name: $full_name, email: $email, password: $password)
-      }
-    `;
-
     const response = yield call(client.mutate, {
       mutation: REGISTOR_USER,
       variables: {
@@ -89,18 +75,21 @@ function* registerSaga({ payload }) {
     });
 
     yield put(actions.initializeSession(response.data.register));
-    const result = yield call(api.getUser);
-    // getting the current user
+
+    const result = yield call(client.query, {
+      query: GET_USER,
+      variables: {
+        token: response.data.register,
+      },
+    });
 
     yield put(actions.loginUserSuccess({ token: response.data.register }));
     yield put(
       actions.getUserSuccess({
-        items: result.data,
+        items: result.data.user,
         accessToken: response.data.register,
       })
     );
-
-    // yield put(actions.registerUserSuccess({ message: response.data.message }));
   } catch (e) {
     yield put(
       actions.loginError({
@@ -112,12 +101,6 @@ function* registerSaga({ payload }) {
 
 function* loginSaga(payload) {
   try {
-    const LOGIN_USER = gql`
-      mutation Login($email: String!, $password: String!) {
-        login(email: $email, password: $password)
-      }
-    `;
-
     const response = yield call(client.mutate, {
       mutation: LOGIN_USER,
       variables: {
@@ -127,13 +110,18 @@ function* loginSaga(payload) {
     });
 
     yield put(actions.initializeSession(response.data.login));
-    const result = yield call(api.getUser);
-    // getting the current user
+
+    const result = yield call(client.query, {
+      query: GET_USER,
+      variables: {
+        token: response.data.login,
+      },
+    });
 
     yield put(actions.loginUserSuccess({ token: response.data.login }));
     yield put(
       actions.getUserSuccess({
-        items: result.data,
+        items: result.data.user,
         accessToken: response.data.login,
       })
     );

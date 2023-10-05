@@ -8,16 +8,16 @@ const addToCartSchema = new mongoose.Schema({
     ref: "Product", // Reference to the 'Product' model
     required: true,
   },
-  color_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Color", // Reference to the 'Color' model
-    required: true,
-  },
-  tone_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Tone", // Reference to the 'Tone' model
-    required: true,
-  },
+  // color_id: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Color", // Reference to the 'Color' model
+  //   required: true,
+  // },
+  // tone_id: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Tone", // Reference to the 'Tone' model
+  //   required: true,
+  // },
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Reference to the 'User' model
@@ -33,8 +33,8 @@ const addToCartSchema = new mongoose.Schema({
 function validateAddToCart(addToCart) {
   const schema = Joi.object({
     product_id: Joi.string().required(),
-    color_id: Joi.string().required(),
-    tone_id: Joi.string().required(),
+    // color_id: Joi.string().required(),
+    // tone_id: Joi.string().required(),
     user_id: Joi.string().required(),
     quantity: Joi.number().required(),
   });

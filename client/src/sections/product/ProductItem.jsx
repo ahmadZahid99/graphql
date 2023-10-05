@@ -14,45 +14,45 @@ import Iconify from "../../components/iconify";
 
 export default function ProductItem({ product }) {
   const { id, title, description, productImage } = product;
-  const renderImages = (
-    <Stack
-      spacing={0.5}
-      direction="row"
-      sx={{
-        p: (theme) => theme.spacing(1, 1, 0, 1),
-      }}
-    >
-      {productImage.length && (
-        <>
-          <Stack flexGrow={1} sx={{ position: "relative" }}>
-            <Image
-              alt={productImage[0]}
-              src={productImage[0]}
-              sx={{ borderRadius: 1, height: 164, width: 1 }}
-            />
-          </Stack>
-          {productImage.length >= 1 && (
-            <Stack spacing={0.5}>
-              <Image
-                alt={productImage[1]}
-                src={productImage[1]}
-                ratio="1/1"
-                sx={{ borderRadius: 1, width: 80 }}
-              />
-              {productImage.length >= 2 && (
-                <Image
-                  alt={productImage[2]}
-                  src={productImage[2]}
-                  ratio="1/1"
-                  sx={{ borderRadius: 1, width: 80 }}
-                />
-              )}
-            </Stack>
-          )}
-        </>
-      )}
-    </Stack>
-  );
+  // const renderImages = (
+  //   <Stack
+  //     spacing={0.5}
+  //     direction="row"
+  //     sx={{
+  //       p: (theme) => theme.spacing(1, 1, 0, 1),
+  //     }}
+  //   >
+  //     {productImage.length && (
+  //       <>
+  //         <Stack flexGrow={1} sx={{ position: "relative" }}>
+  //           <Image
+  //             alt={productImage[0]}
+  //             src={productImage[0]}
+  //             sx={{ borderRadius: 1, height: 164, width: 1 }}
+  //           />
+  //         </Stack>
+  //         {productImage.length >= 1 && (
+  //           <Stack spacing={0.5}>
+  //             <Image
+  //               alt={productImage[1]}
+  //               src={productImage[1]}
+  //               ratio="1/1"
+  //               sx={{ borderRadius: 1, width: 80 }}
+  //             />
+  //             {productImage.length >= 2 && (
+  //               <Image
+  //                 alt={productImage[2]}
+  //                 src={productImage[2]}
+  //                 ratio="1/1"
+  //                 sx={{ borderRadius: 1, width: 80 }}
+  //               />
+  //             )}
+  //           </Stack>
+  //         )}
+  //       </>
+  //     )}
+  //   </Stack>
+  // );
 
   const renderTexts = (
     <ListItemText
@@ -128,7 +128,7 @@ export default function ProductItem({ product }) {
   return (
     <>
       <Card>
-        {renderImages}
+        {/* {renderImages} */}
 
         {renderTexts}
 

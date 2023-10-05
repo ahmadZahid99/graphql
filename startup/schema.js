@@ -3,10 +3,14 @@
 const {
   loginUser,
   createUser,
+  getUser,
 } = require("../src/controllers/user/userController");
 
 const {
   createProduct,
+  getAllProducts,
+  getProductDetail,
+  addToCart,
 } = require("../src/controllers/product/productController");
 
 const {
@@ -202,38 +206,6 @@ const UserType = new GraphQLObjectType({
   }),
 });
 
-// Picture Type
-const PictureType = new GraphQLObjectType({
-  name: "Picture",
-  fields: () => ({
-    // id: { type: GraphQLID },
-    file_name: { type: GraphQLString },
-    file_data: { type: GraphQLString },
-    file_size: { type: GraphQLInt },
-    file_mimetype: { type: GraphQLBoolean },
-  }),
-});
-
-// Tones Type
-const TonesType = new GraphQLObjectType({
-  name: "Tones",
-  fields: () => ({
-    // id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    shades: { type: PictureType },
-  }),
-});
-
-// Color Type
-const ColorType = new GraphQLObjectType({
-  name: "Color",
-  fields: () => ({
-    // id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    tones: { type: TonesType },
-  }),
-});
-
 // Product Type
 const ProductType = new GraphQLObjectType({
   name: "Product",
@@ -241,18 +213,41 @@ const ProductType = new GraphQLObjectType({
     id: { type: GraphQLID },
     title: { type: GraphQLString },
     description: { type: GraphQLString },
-    quantity: { type: GraphQLString },
-    colors: { type: ColorType },
+    quantity: { type: GraphQLInt },
+  }),
+});
+
+const AddToCartType = new GraphQLObjectType({
+  name: "AddToCart",
+  fields: () => ({
+    product: {
+      type: ProductType,
+    },
+    message: { type: GraphQLString },
   }),
 });
 
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
-    users: {
-      type: new GraphQLList(UserType),
+    user: {
+      type: UserType,
+      args: { token: { type: GraphQLString } },
       resolve(parent, args) {
-        return Users.find();
+        return getUser(args);
+      },
+    },
+    products: {
+      type: new GraphQLList(ProductType),
+      resolve(parent, args) {
+        return getAllProducts();
+      },
+    },
+    product: {
+      type: ProductType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return getProductDetail(args);
       },
     },
   },
@@ -268,7 +263,6 @@ const mutation = new GraphQLObjectType({
         password: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve(parent, args) {
-        console.log("args:::", args);
         return loginUser(args);
       },
     },
@@ -285,15 +279,25 @@ const mutation = new GraphQLObjectType({
       },
     },
     createProduct: {
-      type: ProductType,
+      type: GraphQLString,
       args: {
         title: { type: new GraphQLNonNull(GraphQLString) },
         description: { type: new GraphQLNonNull(GraphQLString) },
         quantity: { type: new GraphQLNonNull(GraphQLInt) },
-        colors: { type: new GraphQLNonNull([ColorType]) },
       },
       resolve(parent, args) {
         return createProduct(args);
+      },
+    },
+    addToCart: {
+      type: AddToCartType,
+      args: {
+        product_id: { type: new GraphQLNonNull(GraphQLID) },
+        user_id: { type: new GraphQLNonNull(GraphQLID) },
+        quantity: { type: new GraphQLNonNull(GraphQLInt) },
+      },
+      resolve(parent, args) {
+        return addToCart(args);
       },
     },
   },

@@ -36,22 +36,22 @@ const ProductSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   description: Yup.string().required("Description is required"),
   quantity: Yup.string().required("Quantity is required"),
-  availableColors: Yup.string().required("availableColors is required"),
-  colors: Yup.array().of(
-    Yup.object().shape({
-      name: Yup.string().required("Colors is required"),
-    })
-  ),
-  tones: Yup.array().of(
-    Yup.object().shape({
-      name: Yup.string().required("Tones is required"),
-    })
-  ),
-  shades: Yup.array().of(
-    Yup.object().shape({
-      name: Yup.array().of(Yup.string().required("Shade Name is required")),
-    })
-  ),
+  // availableColors: Yup.string().required("availableColors is required"),
+  // colors: Yup.array().of(
+  //   Yup.object().shape({
+  //     name: Yup.string().required("Colors is required"),
+  //   })
+  // ),
+  // tones: Yup.array().of(
+  //   Yup.object().shape({
+  //     name: Yup.string().required("Tones is required"),
+  //   })
+  // ),
+  // shades: Yup.array().of(
+  //   Yup.object().shape({
+  //     name: Yup.array().of(Yup.string().required("Shade Name is required")),
+  //   })
+  // ),
 });
 
 function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
@@ -60,10 +60,10 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
       title: currentUser?.availableColors || "",
       description: currentUser?.availableColors || "",
       quantity: currentUser?.quantity || 0,
-      availableColors: currentUser?.availableColors || "",
-      colors: currentUser?.colors || [],
-      tones: currentUser?.tones || [],
-      shades: currentUser?.shades || [],
+      // availableColors: currentUser?.availableColors || "",
+      // colors: currentUser?.colors || [],
+      // tones: currentUser?.tones || [],
+      // shades: currentUser?.shades || [],
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentUser]
@@ -82,32 +82,32 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
     formState: { isSubmitting },
   } = methods;
 
-  const {
-    fields: colorsFields,
-    append: appendColors,
-    remove: removeColors,
-  } = useFieldArray({
-    control,
-    name: "colors",
-  });
+  // const {
+  //   fields: colorsFields,
+  //   append: appendColors,
+  //   remove: removeColors,
+  // } = useFieldArray({
+  //   control,
+  //   name: "colors",
+  // });
 
-  const {
-    fields: tonesFields,
-    append: appendTones,
-    remove: removeTones,
-  } = useFieldArray({
-    control,
-    name: "tones",
-  });
+  // const {
+  //   fields: tonesFields,
+  //   append: appendTones,
+  //   remove: removeTones,
+  // } = useFieldArray({
+  //   control,
+  //   name: "tones",
+  // });
 
-  const {
-    fields: shadesFields,
-    append: appendShades,
-    remove: removeShades,
-  } = useFieldArray({
-    control,
-    name: "shades",
-  });
+  // const {
+  //   fields: shadesFields,
+  //   append: appendShades,
+  //   remove: removeShades,
+  // } = useFieldArray({
+  //   control,
+  //   name: "shades",
+  // });
 
   useEffect(() => {
     if (isEdit && currentUser) {
@@ -119,90 +119,89 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, currentUser]);
 
-  const DynamicColorField = (colorNumber) => {
-    const numberOfColors = parseInt(colorNumber, 10);
-    let removeQuantity = 0;
-    let addQuantity = 0;
+  // const DynamicColorField = (colorNumber) => {
+  //   const numberOfColors = parseInt(colorNumber, 10);
+  //   let removeQuantity = 0;
+  //   let addQuantity = 0;
 
-    if (numberOfColors > colorsFields.length) {
-      addQuantity = numberOfColors - colorsFields.length;
-    } else {
-      removeQuantity = colorsFields.length - numberOfColors;
-    }
+  //   if (numberOfColors > colorsFields.length) {
+  //     addQuantity = numberOfColors - colorsFields.length;
+  //   } else {
+  //     removeQuantity = colorsFields.length - numberOfColors;
+  //   }
 
-    // Remove all existing color fields
-    if (removeQuantity > 0)
-      for (let i = colorsFields.length - 1; i >= numberOfColors; i--) {
-        shadesFields.map((item) => item.name.pop());
-        removeColors(i);
-      }
+  //   // Remove all existing color fields
+  //   if (removeQuantity > 0)
+  //     for (let i = colorsFields.length - 1; i >= numberOfColors; i--) {
+  //       shadesFields.map((item) => item.name.pop());
+  //       removeColors(i);
+  //     }
 
-    for (let i = 0; i < addQuantity; i++) {
-      shadesFields.map((item) => item.name.push(""));
-      appendColors({ name: "" });
-    }
-  };
-  const handleAddition = () => {
-    appendTones({
-      name: "",
-    });
-    const numberOfColors = colorsFields.length;
+  //   for (let i = 0; i < addQuantity; i++) {
+  //     shadesFields.map((item) => item.name.push(""));
+  //     appendColors({ name: "" });
+  //   }
+  // };
+  // const handleAddition = () => {
+  //   appendTones({
+  //     name: "",
+  //   });
+  //   const numberOfColors = colorsFields.length;
 
-    appendShades({
-      name: [...Array(numberOfColors)].map(() => ""),
-    });
-  };
+  //   appendShades({
+  //     name: [...Array(numberOfColors)].map(() => ""),
+  //   });
+  // };
 
-  const handleDrop = useCallback(
-    (acceptedFiles, name) => {
-      const file = acceptedFiles[0];
+  // const handleDrop = useCallback(
+  //   (acceptedFiles, name) => {
+  //     const file = acceptedFiles[0];
 
-      const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      });
-      console.log(newFile);
-      if (file) {
-        setValue(name, newFile);
-        // setValue('avatarUrl', newFile, { shouldValidate: true });
-      }
-    },
-    [setValue]
-  );
+  //     const newFile = Object.assign(file, {
+  //       preview: URL.createObjectURL(file),
+  //     });
+  //     console.log(newFile);
+  //     if (file) {
+  //       setValue(name, newFile);
+  //       // setValue('avatarUrl', newFile, { shouldValidate: true });
+  //     }
+  //   },
+  //   [setValue]
+  // );
 
   const onSubmit = async (inputData) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const result = [];
+      // const result = [];
 
-      // Iterate over each color
-      inputData.colors.forEach((color, colorIndex) => {
-        // Initialize the color object for the result
-        const colorObj = {
-          name: color.name,
-          tones: [],
-        };
+      // // Iterate over each color
+      // inputData.colors.forEach((color, colorIndex) => {
+      //   // Initialize the color object for the result
+      //   const colorObj = {
+      //     name: color.name,
+      //     tones: [],
+      //   };
 
-        // Iterate over tones and add corresponding shade
-        inputData.tones.forEach((tone, toneIndex) => {
-          const shade = getValues(`shades[${toneIndex}].name[${colorIndex}]`);
-          colorObj.tones.push({
-            name: tone.name,
-            shade,
-          });
-        });
+      //   // Iterate over tones and add corresponding shade
+      //   inputData.tones.forEach((tone, toneIndex) => {
+      //     const shade = getValues(`shades[${toneIndex}].name[${colorIndex}]`);
+      //     colorObj.tones.push({
+      //       name: tone.name,
+      //       shade,
+      //     });
+      //   });
 
-        // Add the color object to the result array
-        result.push(colorObj);
-      });
+      //   // Add the color object to the result array
+      //   result.push(colorObj);
+      // });
 
       const productData = {
         title: inputData.title,
         description: inputData.description,
         quantity: inputData.quantity,
-        colors: result,
+        // color:result        
       };
-      console.log(productData);
 
       handleSubmited(productData);
       reset();
@@ -231,7 +230,7 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
                     label="Quantity *"
                   />
                 </Grid>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <Controller
                     name="availableColors"
                     control={control}
@@ -258,12 +257,12 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
                       />
                     )}
                   />
-                </Grid>
+                </Grid> */}
               </Grid>
 
               <Divider variant="middle" sx={{ mt: 2, mb: 2 }} />
 
-              <Scrollbar>
+              {/* <Scrollbar>
                 <Stack direction="column" spacing={1} gap={3} sx={{ mb: 2 }}>
                   <Stack
                     direction="row"
@@ -393,7 +392,7 @@ function ProductNewEditForm({ isEdit = false, currentUser, handleSubmited }) {
                 onClick={() => handleAddition()}
               >
                 Additional
-              </Button>
+              </Button> */}
 
               <Stack alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton

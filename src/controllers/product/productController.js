@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
-const asyncHandler = require("express-async-handler");
 const {
   productCreation,
-  addPicByToneId,
   getAllProductsMiddleware,
   getProductMiddleware,
   refactorProductList,
@@ -19,72 +17,57 @@ const { validateAddToCart } = require("../../models/addToCart");
 // @access Private
 // const createProduct = asyncHandler(async (req, res) => {
 const createProduct = async (args) => {
-  // if (!req.result.is_admin) {
-  //   res.status(400);
-  //   throw new Error("You are not allowed to perform this action");
-  // }
+  // await Promise.all(
+  //   prodectData.colors.map(async (data, index) => {
+  //     await Promise.all(
+  //       data.tones.map(async (toneData, toneIndex) => {
+  //         const shades = await addPicByToneId(
+  //           product_pic[`colors[${index}].tones[${toneIndex}].shade`]
+  //         );
+  //         prodectData.colors[index].tones[toneIndex].shades = shades;
+  //       })
+  //     );
+  //   })
+  // );
 
-  const prodectData = JSON.parse(req.body.productData);
-  const product_pic = req?.files;
-
-  await Promise.all(
-    prodectData.colors.map(async (data, index) => {
-      await Promise.all(
-        data.tones.map(async (toneData, toneIndex) => {
-          const shades = await addPicByToneId(
-            product_pic[`colors[${index}].tones[${toneIndex}].shade`]
-          );
-          prodectData.colors[index].tones[toneIndex].shades = shades;
-        })
-      );
-    })
-  );
-
-  if (prodectData) {
-    const { error } = validateProduct(prodectData);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
+  const { error } = validateProduct(args);
+  if (error) {
+    throw new Error(error.details[0].message);
   }
 
   try {
-    // Create the main product
-    const productDetail = await productCreation(prodectData);
+    const productDetail = await productCreation(args);
 
     if (!productDetail) {
       throw new Error(`Product could not be created .`);
     }
 
-    return productDetail;
+    return "Product created successfully!";
   } catch (error) {
     throw new Error(
-      `${
-        error.statusCode !== 400 && res.statusCode !== 400
-          ? "Something went wrong in user creation: "
-          : ""
-      }${error.message}`
+      `"Something went wrong in user creation: " ${error.message}`
     );
   }
 };
+
 // @desc Addd to cart
 // @route POST /product/addtocart
 // @access Private
-const addToCart = asyncHandler(async (req, res) => {
+const addToCart = async (args) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const product = req.body;
+    const { product_id, user_id, quantity } = args;
 
-    const productData = await getProductById(product.product_id);
+    const productData = await getProductById(product_id);
 
     if (!productData) {
-      res.status(400);
       throw new Error("No products found");
     }
 
     const newQuantity =
-      parseInt(productData.quantity, 10) - parseInt(product.quantity, 10);
+      parseInt(productData.quantity, 10) - parseInt(quantity, 10);
 
     const updateProduct = await updateProductMiddleware(
       productData.id,
@@ -92,121 +75,81 @@ const addToCart = asyncHandler(async (req, res) => {
       session
     );
     if (!updateProduct) {
-      res.status(400);
       throw new Error(
         "Product could not be updated. Rollback occur during upadting Product"
       );
     }
-    const cartData = { user_id: req.result.id, ...product };
+    const cartData = {
+      user_id,
+      product_id,
+      quantity,
+    };
 
     if (cartData) {
       const { error } = validateAddToCart(cartData);
       if (error) {
-        res.status(400);
         throw new Error(error.details[0].message);
       }
     }
 
     const createdCart = await addToCartMiddleware(cartData, session);
     if (!createdCart) {
-      res.status(400);
       throw new Error(
         "Cart could not be created. Rollback occur during creating Cart"
       );
     }
     await session.commitTransaction();
+    const product = await getProductMiddleware(product_id);
 
-    return res.status(200).json({ message: "Add to cart successfully!" });
+    return { message: "Add to cart successfully!", product };
   } catch (error) {
     await session.abortTransaction();
-    res.status(
-      error.statusCode
-        ? error.statusCode
-        : res.statusCode
-        ? res.statusCode
-        : 500
-    );
+
     throw new Error(
-      `${
-        error.statusCode !== 400 && res.statusCode !== 400
-          ? "Something went wrong in user creation: "
-          : ""
-      }${error.message}`
+      `"Something went wrong in user creation: "${error.message}`
     );
   }
-});
+};
 
 // @desc Get products data
 // @route GET /product
 // @access Private
-const getAllProducts = asyncHandler(async (req, res) => {
+const getAllProducts = async (req, res) => {
   try {
     //get all products
     const products = await getAllProductsMiddleware();
 
     if (!products) {
-      res.status(400);
       throw new Error("No products found");
     }
-
-    const refactor = refactorProductList(products);
-
-    res.status(200).json({
-      products: refactor,
-    });
+    console.log(products);
+    return products;
   } catch (error) {
-    res.status(
-      error.statusCode
-        ? error.statusCode
-        : res.statusCode
-        ? res.statusCode
-        : 500
-    );
     throw new Error(
-      `${
-        error.statusCode !== 400 && res.statusCode !== 400
-          ? "Something went wrong while fetching products: "
-          : ""
-      }${error.message}`
+      `Something went wrong while fetching products: ${error.message}`
     );
   }
-});
+};
 
 // @desc Get product data by id
 // @route GET /product/id
 // @access Private
-const getProductDetail = asyncHandler(async (req, res) => {
+const getProductDetail = async (args) => {
   try {
     //get all products
-    const products = await getProductMiddleware(req.params.id);
+    const products = await getProductMiddleware(args.id);
 
     if (!products) {
-      res.status(400);
       throw new Error("No product found");
     }
 
-    const productrefactore = refactorProduct(products);
-
-    res.status(200).json({
-      products: productrefactore,
-    });
+    return products;
   } catch (error) {
-    res.status(
-      error.statusCode
-        ? error.statusCode
-        : res.statusCode
-        ? res.statusCode
-        : 500
-    );
     throw new Error(
-      `${
-        error.statusCode !== 400 && res.statusCode !== 400
-          ? "Something went wrong while fetching product: "
-          : ""
-      }${error.message}`
+      `"Something went wrong while fetching product: " ${error.message}`
     );
   }
-});
+};
 
 module.exports = {
   createProduct,

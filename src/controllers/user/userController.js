@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
-const { findUser, userCreation } = require("./userHelper");
+const { getUserById, findUser, userCreation } = require("./userHelper");
 
-const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
 
 const {
   generateToken,
@@ -77,9 +77,33 @@ const createUser = async (args) => {
 // @desc get logedin user
 // @route GET /api/users/
 // @access Private
-const getUser = asyncHandler(async (req, res) => {
-  res.json(req.result);
-});
+const getUser = async (args) => {
+  const { token } = args;
+
+  if (!token) {
+    throw new Error("Not authorized, no token.");
+  }
+
+  try {
+    //Get token from header
+    //verfiy token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    //Get user from token
+
+    const user = await getUserById(decoded.id);
+
+    if (!user) {
+      throw new Error("Not authorized, no token");
+    }
+    return user;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+// const getUser = asyncHandler(async (req, res) => {
+//   res.json(req.result);
+// });
 
 module.exports = {
   createUser,

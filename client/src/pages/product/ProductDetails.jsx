@@ -13,7 +13,7 @@ import { PATH_AUTH, PATH_DASHBOARD } from "../../routes/paths";
 // components
 
 import CustomBreadcrumbs from "../../components/custom-breadcrumbs";
-import ProductDetailsCarousel from "../../sections/product/ProductDetailsCarousel";
+// import ProductDetailsCarousel from "../../sections/product/ProductDetailsCarousel";
 import ProductDetailsSummary from "../../sections/product/ProductDetailsSummary";
 // action
 import {
@@ -28,7 +28,7 @@ import {
 const OrderDetails = memo(
   ({
     Product: { product, message, error },
-    Auth: { isAuthenticated },
+    Auth: { isAuthenticated,user },
     getProductById,
     clrProduct,
     clrMessage,
@@ -89,15 +89,15 @@ const OrderDetails = memo(
           />
           {product && (
             <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
-              <Grid item xs={12} md={6} lg={7}>
+              {/* <Grid item xs={12} md={6} lg={7}>
                 <ProductDetailsCarousel product={product} />
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} md={6} lg={5}>
-                <ProductDetailsSummary product={product} />
+                <ProductDetailsSummary product={product} user={user} />
               </Grid>
             </Grid>
-          )}{" "}
+          )}
         </Container>
       </>
     );

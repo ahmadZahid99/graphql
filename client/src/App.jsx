@@ -35,7 +35,7 @@ import AuthProvider from "./auth/JwtContext";
 
 // ----------------------------------------------------------------------
 
-
+import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
@@ -45,6 +45,8 @@ const store = createStore(
 
 sagaMiddleware.run(rootSaga);
 
+loadErrorMessages()
+loadDevMessages()
 export default function App() {
   return (
    

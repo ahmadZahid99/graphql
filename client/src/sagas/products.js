@@ -1,13 +1,18 @@
 import { takeEvery, call, put, fork } from "redux-saga/effects";
 import * as actions from "../actions/products";
 import * as authActions from "../actions/auth";
-import * as api from "../api/product";
+
 import * as types from "../actions";
 import { setSession } from "../auth/utils";
+import client from "../graphqlClient";
+import { GET_ALL_PRODUCT, GET_PRODUCT_BY_ID } from "../queries/productQueries";
+import { CREATE_PRODUCT, ADD_TO_CART } from "../mutations/productMutations";
 
 function* getProduct() {
   try {
-    const result = yield call(api.getProduct);
+    const result = yield call(client.query, {
+      query: GET_ALL_PRODUCT,
+    });
 
     yield put(
       actions.getProductSuccess({
@@ -40,26 +45,34 @@ function* watchGetProductRequest() {
 
 function* createProduct({ payload }) {
   try {
-    const formData = new FormData();
+    // const formData = new FormData();
 
-    formData.append("productData", JSON.stringify(payload));
-    // Add simple key-value pairs
+    // formData.append("productData", JSON.stringify(payload));
+    // // Add simple key-value pairs
 
-    // Add nested key-value pairs, including file objects
-    payload.colors.forEach((color, colorIndex) => {
-      color.tones.forEach((tone, toneIndex) => {
-        // Append the file to FormData
-        formData.append(
-          `colors[${colorIndex}].tones[${toneIndex}].shade`,
-          tone.shade
-        );
-      });
+    // // Add nested key-value pairs, including file objects
+    // payload.colors.forEach((color, colorIndex) => {
+    //   color.tones.forEach((tone, toneIndex) => {
+    //     // Append the file to FormData
+    //     formData.append(
+    //       `colors[${colorIndex}].tones[${toneIndex}].shade`,
+    //       tone.shade
+    //     );
+    //   });
+    // });
+    console.log(payload);
+    const response = yield call(client.mutate, {
+      mutation: CREATE_PRODUCT,
+      variables: {
+        title: payload.title,
+        description: payload.description,
+        quantity: parseInt(payload.quantity, 10),
+      },
     });
-    const response = yield call(api.createProduct, formData);
 
     yield put(
       actions.createProductSuccess({
-        message: response.data.message,
+        message: response.data.createProduct,
       })
     );
   } catch (e) {
@@ -73,6 +86,7 @@ function* createProduct({ payload }) {
         })
       );
     } else {
+      console.log(e);
       yield put(
         actions.productError({
           error: e.message,
@@ -87,15 +101,26 @@ function* watchCreateProductRequest() {
 }
 function* addToCart({ payload }) {
   try {
-    const response = yield call(api.addToCart, payload);
+    const response = yield call(client.mutate, {
+      mutation: ADD_TO_CART,
+      variables: {
+        user_id: payload.user_id,
+        product_id: payload.product_id,
+        quantity: payload.quantity,
+      },
+    });
 
     yield put(
       actions.addToCartSuccess({
-        message: response.data.message,
+        message: response.data.addToCart.message,
       })
     );
-
-    yield put(actions.getProductByIdRequest(payload.product_id));
+    yield put(
+      actions.getProductByIdSuccess({
+        productDetails: response.data.addToCart.product,
+      })
+    );
+    // yield put(actions.getProductByIdRequest(payload.product_id));
   } catch (e) {
     if (e.message === "Error: Not authorized, no token") {
       setSession(null);
@@ -122,11 +147,14 @@ function* watchAddToCartRequest() {
 
 function* getProductById({ payload }) {
   try {
-    const result = yield call(api.getProductById, payload);
+    const result = yield call(client.query, {
+      query: GET_PRODUCT_BY_ID,
+      variables: { id: payload.productId },
+    });
 
     yield put(
       actions.getProductByIdSuccess({
-        productDetails: result.data.products,
+        productDetails: result.data.product,
       })
     );
   } catch (e) {

@@ -21,14 +21,16 @@ import { addToCartRequest } from "../../actions/products";
 
 // ----------------------------------------------------------------------
 
-function ProductDetailsSummary({ product, addToCart }) {
-  const { id, title, description, available, color } = product;
+function ProductDetailsSummary({ product, addToCart, user }) {
+  const { id, title, description, quantity
+    // , color 
+  } = product;
 
   const defaultValues = {
     colorsPicker: 0,
     tonePicker: 0,
     selectedImage: 0,
-    quantity: available < 1 ? 0 : 1,
+    available: quantity < 1 ? 0 : 1,
   };
 
   const methods = useForm({
@@ -49,79 +51,80 @@ function ProductDetailsSummary({ product, addToCart }) {
   const handleAddCart = handleSubmit(async (data) => {
     const cartData = {
       product_id: id,
-      quantity: data.quantity,
-      color_id: color[data.colorsPicker].id,
-      tone_id: color[data.colorsPicker].tone[data.tonePicker].id,
+      quantity: data.available,
+      user_id: user.id
+      // color_id: color[data.colorsPicker].id,
+      // tone_id: color[data.colorsPicker].tone[data.tonePicker].id,
     };
 
     addToCart(cartData);
   });
 
-  const handleImageChange = (_, newImageIndex) => {
-    setValue("selectedImage", newImageIndex);
-  };
+  // const handleImageChange = (_, newImageIndex) => {
+  //   setValue("selectedImage", newImageIndex);
+  // };
 
-  const renderColorOptions = (
-    <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
-        Color
-      </Typography>
-      <RHFRadioGroup
-        row
-        name="colorsPicker"
-        options={[
-          ...color.map((data, index) => ({ label: data.name, value: index })),
-        ]}
-      />
-    </Stack>
-  );
-  const renderTonerOptions = (
-    <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
-        Tone
-      </Typography>
-      {!!color[0].tone.length && (
-        <RHFRadioGroup
-          row
-          name="tonePicker"
-          options={[
-            ...color[0].tone.map((data, index) => ({
-              label: data.name,
-              value: index,
-            })),
-          ]}
-        />
-      )}
-    </Stack>
-  );
-  const renderImageOptions = (
-    <Paper elevation={3}>
-      <ToggleButtonGroup
-        value={values.selectedImage}
-        exclusive
-        onChange={handleImageChange}
-        aria-label="image-selector"
-        style={{ overflowX: "auto", whiteSpace: "nowrap" }}
-      >
-        {(getValues("colorsPicker") || getValues("colorsPicker") === 0) &&
-          color[`${getValues("colorsPicker")}`].tone.map((data, index) => (
-            <ToggleButton key={index} value={index}>
-              <img
-                src={data.image}
-                alt={`pic ${index + 1}`}
-                style={{
-                  width: "100px", // Adjust the width as needed
-                  border:
-                    values.selectedImage === index
-                      ? "2px solid #007BFF"
-                      : "2px solid transparent",
-                }}
-              />
-            </ToggleButton>
-          ))}
-      </ToggleButtonGroup>
-    </Paper>
-  );
+  // const renderColorOptions = (
+  //   <Stack direction="row">
+  //     <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
+  //       Color
+  //     </Typography>
+  //     <RHFRadioGroup
+  //       row
+  //       name="colorsPicker"
+  //       options={[
+  //         ...color.map((data, index) => ({ label: data.name, value: index })),
+  //       ]}
+  //     />
+  //   </Stack>
+  // );
+  // const renderTonerOptions = (
+  //   <Stack direction="row">
+  //     <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
+  //       Tone
+  //     </Typography>
+  //     {!!color[0].tone.length && (
+  //       <RHFRadioGroup
+  //         row
+  //         name="tonePicker"
+  //         options={[
+  //           ...color[0].tone.map((data, index) => ({
+  //             label: data.name,
+  //             value: index,
+  //           })),
+  //         ]}
+  //       />
+  //     )}
+  //   </Stack>
+  // );
+  // const renderImageOptions = (
+  //   <Paper elevation={3}>
+  //     <ToggleButtonGroup
+  //       value={values.selectedImage}
+  //       exclusive
+  //       onChange={handleImageChange}
+  //       aria-label="image-selector"
+  //       style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+  //     >
+  //       {(getValues("colorsPicker") || getValues("colorsPicker") === 0) &&
+  //         color[`${getValues("colorsPicker")}`].tone.map((data, index) => (
+  //           <ToggleButton key={index} value={index}>
+  //             <img
+  //               src={data.image}
+  //               alt={`pic ${index + 1}`}
+  //               style={{
+  //                 width: "100px", // Adjust the width as needed
+  //                 border:
+  //                   values.selectedImage === index
+  //                     ? "2px solid #007BFF"
+  //                     : "2px solid transparent",
+  //               }}
+  //             />
+  //           </ToggleButton>
+  //         ))}
+  //     </ToggleButtonGroup>
+  //   </Paper>
+  // );
 
   const renderQuantity = (
     <Stack direction="row">
@@ -131,12 +134,12 @@ function ProductDetailsSummary({ product, addToCart }) {
 
       <Stack spacing={1}>
         <IncrementerButton
-          name="quantity"
-          quantity={values.quantity}
-          disabledDecrease={values.quantity <= 1}
-          disabledIncrease={values.quantity >= available}
-          onIncrease={() => setValue("quantity", values.quantity + 1)}
-          onDecrease={() => setValue("quantity", values.quantity - 1)}
+          name="available"
+          quantity={values.available}
+          disabledDecrease={values.available <= 1}
+          disabledIncrease={values.available >= quantity}
+          onIncrease={() => setValue("available", values.available + 1)}
+          onDecrease={() => setValue("available", values.available - 1)}
         />
 
         <Typography
@@ -144,7 +147,7 @@ function ProductDetailsSummary({ product, addToCart }) {
           component="div"
           sx={{ textAlign: "right" }}
         >
-          Available: {parseInt(available, 10)}
+          Available: {parseInt(quantity, 10)}
         </Typography>
       </Stack>
     </Stack>
@@ -182,10 +185,10 @@ function ProductDetailsSummary({ product, addToCart }) {
           {renderSubDescription}
         </Stack>
         <Divider sx={{ borderStyle: "dashed" }} />
-        {renderColorOptions}
+        {/* {renderColorOptions}
 
         {renderTonerOptions}
-        {renderImageOptions}
+        {renderImageOptions} */}
         {renderQuantity}
         <Divider sx={{ borderStyle: "dashed" }} />
         {renderActions}
@@ -196,6 +199,7 @@ function ProductDetailsSummary({ product, addToCart }) {
 
 ProductDetailsSummary.propTypes = {
   product: PropTypes.object,
+  user: PropTypes.object,
   addToCart: PropTypes.func,
 };
 
